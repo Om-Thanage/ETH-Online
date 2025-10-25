@@ -10,7 +10,6 @@ interface IssuerProfile {
   phone: string;
   organizationType: string;
   website?: string;
-  proofOfOwnership?: string;
   wallet: string;
   status: 'pending' | 'approved' | 'rejected';
   apiKey?: string;

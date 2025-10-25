@@ -4,6 +4,7 @@ import "./globals.css";
 import Provider from "./provider";
 import { headers } from "next/headers";
 import { cookieToWeb3AuthState } from "@web3auth/modal";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Provider web3authInitialState={web3authInitialState}>
+          <Navbar />
           {children}
         </Provider>
       </body>

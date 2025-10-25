@@ -4,10 +4,10 @@ import { createIssuer, getIssuerByWallet } from '@/models/Issuer';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, organizationType, website, proofOfOwnership, wallet } = body;
+    const { name, email, phone, organizationType, website, wallet } = body;
 
     // Validation
-    if (!name || !email || !phone || !organizationType || !proofOfOwnership || !wallet) {
+    if (!name || !email || !phone || !organizationType || !wallet) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
