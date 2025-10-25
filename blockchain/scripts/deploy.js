@@ -4,32 +4,31 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deploying with:", deployer.address);
 
-  // 1. Deploy IssuerRegistry
-  const IssuerRegistry = await hre.ethers.getContractFactory("IssuerRegistry");
-  const issuerRegistry = await IssuerRegistry.deploy();
-  await issuerRegistry.waitForDeployment();
-  console.log("IssuerRegistry deployed to:", issuerRegistry.target);
+  const backendWallet = process.env.BACKEND_WALLET || "0xYourBackendWallet";
 
-  // 2. Deploy CertificationNFT
-  const CertNFT = await hre.ethers.getContractFactory("CertificationNFT");
-  const certNFT = await CertNFT.deploy(issuerRegistry.target);
-  await certNFT.waitForDeployment();
-  console.log("CertificationNFT deployed to:", certNFT.target);
+  // 2. Deploy SkillNFT
+  const SkillNFT = await hre.ethers.getContractFactory("SkillNFT");
+  const skillNFT = await SkillNFT.deploy(registry.target);
+  await skillNFT.waitForDeployment();
+  console.log("SkillNFT deployed to:", skillNFT.target);
 
-  // 3. Deploy SkillRental
-  const SkillRental = await hre.ethers.getContractFactory("SkillRental");
-  const skillRental = await SkillRental.deploy(certNFT.target);
-  await skillRental.waitForDeployment();
-  console.log("SkillRental deployed to:", skillRental.target);
+  // 3. Deploy RentalManager
+  const RentalManager = await hre.ethers.getContractFactory("RentalManager");
+  const rentalMgr = await RentalManager.deploy(skillNFT.target, registry.target);
+  await rentalMgr.waitForDeployment();
+  console.log("RentalManager deployed to:", rentalMgr.target);
 
-  // 4. Add test issuer (Udemy)
-  // await issuerRegistry.addIssuer("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "Udemy");
-  // console.log("Udemy added as issuer");
+  // 4. Deploy IssuanceAPI
+  const IssuanceAPI = await hre.ethers.getContractFactory("IssuanceAPI");
+  const issuanceAPI = await IssuanceAPI.deploy(skillNFT.target, backendWallet);
+  await issuanceAPI.waitForDeployment();
+  console.log("IssuanceAPI deployed to:", issuanceAPI.target);
 
-  // console.log("\nDEPLOYED ADDRESSES:");
-  // console.log("ISSUER_REGISTRY=", issuerRegistry.target);
-  // console.log("CERT_NFT=", certNFT.target);
-  // console.log("SKILL_RENTAL=", skillRental.target);
+  console.log("\nDEPLOYED ADDRESSES:");
+  console.log("CERTIFICATION_REGISTRY=", registry.target);
+  console.log("SKILL_NFT=", skillNFT.target);
+  console.log("RENTAL_MANAGER=", rentalMgr.target);
+  console.log("ISSUANCE_API=", issuanceAPI.target);
 }
 
 main().catch((error) => {

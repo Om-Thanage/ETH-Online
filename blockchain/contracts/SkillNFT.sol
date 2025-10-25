@@ -48,9 +48,9 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override {
+        uint256 tokenId
+        //uint256 batchSize
+    ) internal view {
         if (from != address(0) && to != address(0)) {
             require(userOf(tokenId) == address(0), "Soulbound: rental active");
         }
