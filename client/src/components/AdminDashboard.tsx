@@ -28,25 +28,25 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      // Check if user is super admin
-      const adminRes = await fetch('/api/admin/issuers', {
-        credentials: 'include', // ← IMPORTANT: Include cookies
-      });
-      if (adminRes.status === 401) {
-        console.log('Unauthorized, redirecting to login');
-        router.push('/admin/login');
-        return;
-      }
+      // // Check if user is super admin
+      // const adminRes = await fetch('/api/admin/issuers', {
+      //   credentials: 'include', // ← IMPORTANT: Include cookies
+      // });
+      // if (adminRes.status === 401) {
+      //   console.log('Unauthorized, redirecting to login');
+      //   router.push('/admin/login');
+      //   return;
+      // }
 
-      if (!adminRes.ok) {
-        console.error('Error fetching issuers:', adminRes.statusText);
-        setLoading(false);
-        return;
-      }
+      // if (!adminRes.ok) {
+      //   console.error('Error fetching issuers:', adminRes.statusText);
+      //   setLoading(false);
+      //   return;
+      // }
 
-      // Fetch issuers
-      const issuersData = await adminRes.json();
-      setIssuers(issuersData.issuers || []);
+      // // Fetch issuers
+      // const issuersData = await adminRes.json();
+      // setIssuers(issuersData.issuers || []);
 
       // Fetch admins if super admin
       try {
