@@ -57,18 +57,18 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/issuers/approve', {
         method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ issuerId }),
       });
 
       const data = await res.json();
       if (data.success) {
-        alert(`✅ Approved! API Key: ${data.apiKey}`);
+        alert(`Approved! API Key: ${data.apiKey}`);
         fetchData();
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      alert(`Error: ${error}`);
     } finally {
       setApproving(null);
     }
@@ -85,11 +85,11 @@ export default function AdminDashboard() {
 
       const data = await res.json();
       if (data.success) {
-        alert('✅ Rejected');
+        alert('Rejected');
         fetchData();
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      alert(`Error: ${error}`);
     }
   };
 
@@ -122,34 +122,13 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleChangeAdminRole = async (adminId: string, newRole: 'admin' | 'super_admin') => {
-    try {
-      const res = await fetch('/api/admin/admins/update-role', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId, role: newRole }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert('✅ Admin role updated');
-        fetchData();
-      } else {
-        alert(`${data.error}`);
-      }
-    } catch (error) {
-      alert(`Error: ${error}`);
-    }
-  };
-
   const handleDeleteAdmin = async (adminId: string) => {
     if (!confirm('Are you sure you want to delete this admin?')) return;
 
     try {
       const res = await fetch('/api/admin/admins/delete', {
         method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminId }),
       });
