@@ -142,27 +142,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleChangeAdminRole = async (adminId: string, newRole: 'admin' | 'super_admin') => {
-    try {
-      const res = await fetch('/api/admin/admins/update-role', {
-        method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId, role: newRole }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert('✅ Admin role updated');
-        fetchData();
-      } else {
-        alert(`❌ ${data.error}`);
-      }
-    } catch (error) {
-      alert(`❌ Error: ${error}`);
-    }
-  };
-
   const handleDeleteAdmin = async (adminId: string) => {
     if (!confirm('Are you sure you want to delete this admin?')) return;
 
