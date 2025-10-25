@@ -320,31 +320,44 @@ export default function AdminDashboard() {
                     key={admin._id}
                     className="bg-gray-700 p-4 rounded border border-gray-600 flex justify-between items-center"
                   >
+                    {(admin.role === 'admin') ? (
+                    <>
+                      <div>
+                        <p className="font-bold">{admin.email}</p>
+                        <p className="text-sm text-gray-400">
+                          Role:{' '}
+                          <span
+                            className='text-blue-400'
+                          >
+                            {admin.role}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+
+                        <button
+                          onClick={() => handleDeleteAdmin(admin._id)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                    ) : (
                     <div>
                       <p className="font-bold">{admin.email}</p>
                       <p className="text-sm text-gray-400">
                         Role:{' '}
                         <span
-                          className={
-                            admin.role === 'super_admin'
-                              ? 'text-yellow-400 font-bold'
-                              : 'text-blue-400'
-                          }
+                          className='text-green-400'
                         >
                           {admin.role}
                         </span>
                       </p>
                     </div>
+                    )}
 
-                    <div className="flex gap-2">
-
-                      <button
-                        onClick={() => handleDeleteAdmin(admin._id)}
-                        className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    
                   </div>
                 ))}
               </div>

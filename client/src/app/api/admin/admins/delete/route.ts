@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Prevent self-deletion
-  if (admin._id.toString() === adminId) {
+  if (admin && admin._id && admin._id.toString() === adminId) {
     return NextResponse.json(
       { error: 'Cannot delete your own account' },
       { status: 403 }
