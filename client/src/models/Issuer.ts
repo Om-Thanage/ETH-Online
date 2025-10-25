@@ -5,7 +5,10 @@ export interface Issuer {
   _id?: ObjectId;
   name: string;
   wallet: string;
-  email?: string;
+  email: string;
+  phone: string;
+  organizationType: string;
+  website?: string;
   status: 'pending' | 'approved' | 'rejected';
   apiKey?: string;
   createdAt: Date;

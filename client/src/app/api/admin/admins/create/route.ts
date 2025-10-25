@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { email, password, role } = await req.json();
+  const { email, password } = await req.json();
 
   if (!email || !password) {
     return NextResponse.json(

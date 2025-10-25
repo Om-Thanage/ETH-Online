@@ -26,6 +26,21 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
+  const fetchIssuers = async () => {
+    try {
+      const res = await fetch('/api/admin/issuers', 
+        { credentials: 'include' });
+      if (res.status === 200) {
+        const data = await res.json();
+        setIssuers(data.issuers || []);
+      } else {
+        alert('Failed to fetch issuers');
+      }
+    } catch (error) {
+      alert(`Error fetching issuers: ${error}`);
+    }
+  }
+
   const fetchData = async () => {
     try {
       // Fetch admins if super admin
@@ -37,6 +52,7 @@ export default function AdminDashboard() {
           const adminsData = await adminsRes.json();
           setAdmins(adminsData.admins || []);
           setIsSuperAdmin(true);
+          fetchIssuers();
         } else if (adminsRes.status === 403) {
           console.log('User is not super admin');
           setIsSuperAdmin(false);

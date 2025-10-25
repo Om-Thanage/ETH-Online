@@ -22,7 +22,7 @@ export async function verifyAdmin(request: NextRequest) {
 
     const admin = await getAdminByEmail(decoded.email);
 
-    if (!admin || !admin.canApproveIssuers) {
+    if (!admin) {
       return { admin: null, error: 'Forbidden' };
     }
 
