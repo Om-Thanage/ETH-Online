@@ -43,14 +43,27 @@ export async function updateIssuerStatus(id: string, status: 'approved' | 'rejec
   await db.collection('issuers').updateOne({ _id: new ObjectId(id) }, { $set: update });
 }
 
-export async function updateIssuerApiKey(id: ObjectId, apiKey: string) {
+export async function updateIssuerApiKey(id: ObjectId | string, apiKey: string) {
   const client = await clientPromise;
   const db = client.db();
-  await db.collection('issuers').updateOne({ _id: id }, { $set: { apiKey } });
+  const objectId = typeof id === 'string' ? new ObjectId(id) : id;
+  await db.collection('issuers').updateOne({ _id: objectId }, { $set: { apiKey } });
 }
 
 export async function getAllIssuers(): Promise<Issuer[]> {
   const client = await clientPromise;
   const db = client.db();
   return db.collection<Issuer>('issuers').find({}).toArray();
+}
+
+export async function getPendingIssuers(): Promise<Issuer[]> {
+  const client = await clientPromise;
+  const db = client.db();
+  return db.collection<Issuer>('issuers').find({ status: 'pending' }).toArray();
+}
+
+export async function getApprovedIssuers(): Promise<Issuer[]> {
+  const client = await clientPromise;
+  const db = client.db();
+  return db.collection<Issuer>('issuers').find({ status: 'approved' }).toArray();
 }
