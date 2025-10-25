@@ -11,7 +11,7 @@ declare global {
 }
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('Add MONGODB_URI to .env.local');
+  throw new Error('Add MONGODB_URI to .env');
 }
 
 if (process.env.NODE_ENV === 'development') {
