@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -28,7 +28,7 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
 
     constructor(address _registry)
         ERC721("SkillCredential", "SKILL")
-        ERC4907("SkillCredential", "SKILL")
+        ERC4907()
     {
         registry = _registry;
     }
@@ -49,30 +49,39 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
         _setTokenURI(tokenId, uri);
 
         if (expires > 0) {
-            _setUser(tokenId, to, expires);
+            setUser(tokenId, to, expires);
         }
 
         emit CredentialMinted(tokenId, to, expires, skill, msg.sender);
         return tokenId;
     }
 
-    // Soulbound for permanent credentials
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 tokenId,
-        uint256
-    ) internal override {
-        super._beforeTokenTransfer(from, to, tokenId, 1);
+        uint256 batchSize
+    ) internal {
         if (from != address(0) && to != address(0)) {
             require(userOf(tokenId) == address(0), "Soulbound: rental active");
         }
     }
 
-    function _isApprovedOrOwner(address spender, uint256 tokenId)
-        internal view override returns (bool)
-    {
-        return ERC721._isApprovedOrOwner(spender, tokenId);
+    function setUser(uint256 tokenId, address user, uint64 expires) public override(ERC4907, ISkillNFT) {
+        ERC4907.setUser(tokenId, user, expires);
+    }
+
+    function userOf(uint256 tokenId) public view override(ERC4907, ISkillNFT) returns (address) {
+        return ERC4907.userOf(tokenId);
+    }
+
+    function userExpires(uint256 tokenId) public view override(ERC4907, ISkillNFT) returns (uint64) {
+        return ERC4907.userExpires(tokenId);
+    }
+
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view override returns (bool) {
+        address owner = ownerOf(tokenId);
+        return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -81,7 +90,7 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
         return super.supportsInterface(interfaceId);
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return ERC721URIStorage.tokenURI(tokenId);
     }
 }
