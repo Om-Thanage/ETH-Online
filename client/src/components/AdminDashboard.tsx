@@ -378,22 +378,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      {admin.role === 'admin' && (
-                        <button
-                          onClick={() => handleChangeAdminRole(admin._id, 'super_admin')}
-                          className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-sm"
-                        >
-                          Promote
-                        </button>
-                      )}
-                      {admin.role === 'super_admin' && (
-                        <button
-                          onClick={() => handleChangeAdminRole(admin._id, 'admin')}
-                          className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm"
-                        >
-                          Demote
-                        </button>
-                      )}
+
                       <button
                         onClick={() => handleDeleteAdmin(admin._id)}
                         className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
