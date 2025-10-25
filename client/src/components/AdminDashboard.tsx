@@ -28,30 +28,10 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      // // Check if user is super admin
-      // const adminRes = await fetch('/api/admin/issuers', {
-      //   credentials: 'include', // ← IMPORTANT: Include cookies
-      // });
-      // if (adminRes.status === 401) {
-      //   console.log('Unauthorized, redirecting to login');
-      //   router.push('/admin/login');
-      //   return;
-      // }
-
-      // if (!adminRes.ok) {
-      //   console.error('Error fetching issuers:', adminRes.statusText);
-      //   setLoading(false);
-      //   return;
-      // }
-
-      // // Fetch issuers
-      // const issuersData = await adminRes.json();
-      // setIssuers(issuersData.issuers || []);
-
       // Fetch admins if super admin
       try {
         const adminsRes = await fetch('/api/admin/admins', {
-          credentials: 'include', // ← IMPORTANT: Include cookies
+          credentials: 'include',
         });
         if (adminsRes.status === 200) {
           const adminsData = await adminsRes.json();
@@ -98,7 +78,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/issuers/reject', {
         method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ issuerId }),
       });
@@ -122,23 +102,23 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/admins/create', {
         method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: newAdminEmail, password: newAdminPassword }),
       });
 
       const data = await res.json();
       if (data.success) {
-        alert('✅ Admin created successfully');
+        alert('Admin created successfully');
         setNewAdminEmail('');
         setNewAdminPassword('');
         setShowAddAdmin(false);
         fetchData();
       } else {
-        alert(`❌ ${data.error}`);
+        alert(`${data.error}`);
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      alert(`Error: ${error}`);
     }
   };
 
@@ -146,7 +126,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/admins/update-role', {
         method: 'POST',
-        credentials: 'include', // ← IMPORTANT: Include cookies
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminId, role: newRole }),
       });
@@ -156,10 +136,10 @@ export default function AdminDashboard() {
         alert('✅ Admin role updated');
         fetchData();
       } else {
-        alert(`❌ ${data.error}`);
+        alert(`${data.error}`);
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      alert(`Error: ${error}`);
     }
   };
 
@@ -176,20 +156,20 @@ export default function AdminDashboard() {
 
       const data = await res.json();
       if (data.success) {
-        alert('✅ Admin deleted');
+        alert('Admin deleted');
         fetchData();
       } else {
-        alert(`❌ ${data.error}`);
+        alert(`${data.error}`);
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      alert(`Error: ${error}`);
     }
   };
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', {
       method: 'POST',
-      credentials: 'include', // ← IMPORTANT: Include cookies
+      credentials: 'include',
     });
     router.push('/admin/login');
   };
