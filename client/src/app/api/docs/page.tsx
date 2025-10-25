@@ -122,19 +122,19 @@ export default function ApiDocs() {
                   </div>
                   <pre className="p-4 overflow-x-auto bg-white dark:bg-gray-950">
                     <code className="text-sm font-mono text-gray-800 dark:text-gray-200">
-{`{
-  "success": true,
-  "message": "Certificate issued successfully",
-  "data": {
-    "credentialId": "cred_1a2b3c4d5e6f",
-    "userWallet": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-    "course": "Solidity 101",
-    "skills": ["ERC721", "IPFS", "Smart Contracts"],
-    "issuedAt": "2025-10-25T14:30:00Z",
-    "expiresAt": "2026-01-23T14:30:00Z",
-    "status": "pending"
-  }
-}`}
+                      {`{
+                        "success": true,
+                        "message": "Certificate issued successfully",
+                        "data": {
+                          "credentialId": "cred_1a2b3c4d5e6f",
+                          "userWallet": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+                          "course": "Solidity 101",
+                          "skills": ["ERC721", "IPFS", "Smart Contracts"],
+                          "issuedAt": "2025-10-25T14:30:00Z",
+                          "expiresAt": "2026-01-23T14:30:00Z",
+                          "status": "pending"
+                        }
+                      }`}
                     </code>
                   </pre>
                 </div>

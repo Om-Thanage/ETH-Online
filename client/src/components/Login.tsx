@@ -3,12 +3,13 @@ import { useWeb3AuthConnect, useWeb3AuthDisconnect, useWeb3AuthUser } from "@web
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import WalletUIButton from "./WalletUi";
 
 function Login() {
   const { connect, isConnected, loading: connectLoading, error: connectError } = useWeb3AuthConnect();
   const { disconnect, loading: disconnectLoading, error: disconnectError } = useWeb3AuthDisconnect();
-  // const { userInfo } = useWeb3AuthUser();
-  const { address, connector } = useAccount();
+  const { userInfo } = useWeb3AuthUser();
+  const { address } = useAccount();
   const [copied, setCopied] = useState(false);
 
   // function uiConsole(...args: any[]): void {
@@ -40,18 +41,24 @@ function Login() {
     <div className="flex justify-end items-center gap-6">
       {/* <h2>Connected to {connector?.name}</h2> */}
       <div className="flex items-center gap-3 text-white bg-gray-800 px-4 py-2 border-2 border-white rounded">
-        <span>Wallet: {formatAddress(address)}</span>
-        <button
-          onClick={handleCopy}
-          className="hover:text-blue-400 transition-all"
-          title="Copy to clipboard"
-        >
-          {copied ? (
-            <Check size={18} className="text-green-400" />
-          ) : (
-            <Copy size={18} className="text-white" />
-          )}
-        </button>
+        {!userInfo?.name ? (
+          <>
+            <span>Wallet: {formatAddress(address)}</span>
+            <button
+              onClick={handleCopy}
+              className="hover:text-blue-400 transition-all"
+              title="Copy to clipboard"
+            >
+              {copied ? (
+                <Check size={18} className="text-green-400" />
+              ) : (
+                <Copy size={18} className="text-white" />
+              )}
+            </button>
+          </>
+        ) : (
+          <WalletUIButton />
+        )}
       </div>
       <div>
         <button
