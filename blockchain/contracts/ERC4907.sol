@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: CC0-1.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.28;
 
 /**
  * @title ERC4907 – Rentable NFTs
  */
 abstract contract ERC4907 {
-    string public name;
-    string public symbol;
 
     struct UserInfo {
         address user;
@@ -16,11 +14,6 @@ abstract contract ERC4907 {
     mapping(uint256 => UserInfo) internal _users;
 
     event UpdateUser(uint256 indexed tokenId, address indexed user, uint64 expires);
-
-    constructor(string memory name_, string memory symbol_) {
-        name = name_;
-        symbol = symbol_;
-    }
 
     function setUser(uint256 tokenId, address user, uint64 expires) public virtual {
         require(_isApprovedOrOwner(msg.sender, tokenId), "Not owner/approved");
