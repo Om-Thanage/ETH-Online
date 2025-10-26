@@ -15,25 +15,28 @@ export async function POST(req: Request) {
     const provider = new ethers.JsonRpcProvider(process.env.MUMBAI_RPC);
     const wallet = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY!, provider);
     const contract = new ethers.Contract(
-      process.env.CERT_NFT_ADDRESS!,
-      ['function batchMint(address[],string[],uint256[],string[],bool[])'],
+      process.env.ISSUANCE_API_ADDRESS!,
+      ['function issueCredential(address,string,uint64,string) returns (uint256)'],
       wallet
     );
 
-    const calldata = contract.interface.encodeFunctionData('batchMint', [
-      pending.map(p => p.userWallet),
-      pending.map(p => p.course),
-      pending.map(p => p.expiresAt || 0),
-      pending.map(p => p.cid),
-      pending.map(p => p.isRental),
-    ]);
-
-    const tx = await wallet.sendTransaction({ to: process.env.CERT_NFT_ADDRESS, data: calldata });
-    await tx.wait();
+    const txHashes = [];
+    
+    // Issue credentials one by one
+    for (const action of pending) {
+      const tx = await contract.issueCredential(
+        action.userWallet,
+        action.cid, // URI
+        action.expiresAt || 0, // expires
+        action.course // skill
+      );
+      const receipt = await tx.wait();
+      txHashes.push(receipt.hash);
+    }
 
     await markSettled(pending.map(p => p._id!));
 
-    return NextResponse.json({ success: true, txHash: tx.hash });
+    return NextResponse.json({ success: true, txHashes });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -13,13 +13,13 @@ export async function POST(req: Request) {
   try {
     const provider = new ethers.JsonRpcProvider(process.env.MUMBAI_RPC);
     const wallet = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY!, provider);
-    const rental = new ethers.Contract(
-      process.env.SKILL_RENTAL_ADDRESS!,
+    const skillNFT = new ethers.Contract(
+      process.env.SKILL_NFT_ADDRESS!,
       ['function setUser(uint256,address,uint64)'],
       wallet
     );
 
-    const tx = await rental.setUser(tokenId, userWallet, newExpires);
+    const tx = await skillNFT.setUser(tokenId, userWallet, newExpires);
     await tx.wait();
 
     return NextResponse.json({ success: true, newExpires });

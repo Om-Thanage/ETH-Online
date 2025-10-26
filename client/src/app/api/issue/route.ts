@@ -125,9 +125,20 @@ export async function POST(req: Request) {
 
     const expires = expiresInDays > 0 ? Math.floor(Date.now() / 1000) + expiresInDays * 86400 : 0;
 
-    await sendOffchainMint({ to: userWallet, course, expires, cid: metadataUri, isRental: expiresInDays > 0 });
-
+    // Get issuer before sending offchain mint
     const issuer = await findIssuerByApiKey(req.headers.get('authorization')!.split(' ')[1]!);
+    
+    // Send offchain mint with timeout to prevent hanging
+    try {
+      await Promise.race([
+        sendOffchainMint({ to: userWallet, course, expires, cid: metadataUri, isRental: expiresInDays > 0 }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Offchain mint timeout')), 10000))
+      ]);
+    } catch (mintError: any) {
+      console.error('Offchain mint error (continuing anyway):', mintError);
+      // Continue execution even if offchain mint fails - we'll still create the pending action
+    }
+
     await createPendingAction({
       userWallet,
       course,
@@ -146,6 +157,6 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('Issue certificate error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
