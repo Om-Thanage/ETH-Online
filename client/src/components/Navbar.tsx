@@ -18,9 +18,6 @@ export default function Navbar() {
           <Link href="/issuer" className="text-white hover:text-gray-300 font-bold">
             Issuers
           </Link>
-          <Link href="/admin/login" className="text-white hover:text-gray-300 font-bold">
-            Admin
-          </Link>
           <Link href="/api/docs" className="text-white hover:text-gray-300 font-bold">
             API Docs
           </Link>
