@@ -33,6 +33,15 @@ export async function getPendingActions(userWallet: string): Promise<PendingActi
     .toArray();
 }
 
+export async function getPendingActionsByIssuer(issuerId: ObjectId): Promise<PendingAction[]> {
+  const client = await clientPromise;
+  const db = client.db();
+  return db.collection<PendingAction>('pending_actions')
+    .find({ issuerId })
+    .sort({ createdAt: -1 })
+    .toArray();
+}
+
 export async function markSettled(ids: ObjectId[]) {
   const client = await clientPromise;
   const db = client.db();

@@ -40,6 +40,14 @@ function Login() {
   const loggedInView = (
     <div className="flex justify-end items-center gap-6">
       {/* <h2>Connected to {connector?.name}</h2> */}
+      <div className="flex items-center gap-3">
+        <a
+          href={`/certificates/${address}`}
+          className="bg-blue-600 text-white px-4 py-2 font-bold hover:bg-blue-500 active:shadow-none transition-all rounded"
+        >
+          My Certificates
+        </a>
+      </div>
       <div className="flex items-center gap-3 text-white bg-gray-800 px-4 py-2 border-2 border-white rounded">
         {!userInfo?.name ? (
           <>
