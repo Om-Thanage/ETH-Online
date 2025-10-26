@@ -5,6 +5,7 @@ import { createPendingAction } from '@/models/PendingAction';
 import { sendOffchainMint } from '@/lib/yellow';
 import { verifyIssuer } from '@/middleware/issuerAuth';
 import { findIssuerByApiKey } from '@/models/Issuer';
+import { sendGaslessTransaction, isBiconomyAvailable } from '@/lib/biconomy';
 
 export async function POST(req: Request) {
   const authError = await verifyIssuer(req);
@@ -125,36 +126,119 @@ export async function POST(req: Request) {
 
     const expires = expiresInDays > 0 ? Math.floor(Date.now() / 1000) + expiresInDays * 86400 : 0;
 
-    // Get issuer before sending offchain mint
+    // Get issuer before minting
     const issuer = await findIssuerByApiKey(req.headers.get('authorization')!.split(' ')[1]!);
     
-    // Send offchain mint with timeout to prevent hanging
-    try {
-      await Promise.race([
-        sendOffchainMint({ to: userWallet, course, expires, cid: metadataUri, isRental: expiresInDays > 0 }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Offchain mint timeout')), 10000))
-      ]);
-    } catch (mintError: any) {
-      console.error('Offchain mint error (continuing anyway):', mintError);
-      // Continue execution even if offchain mint fails - we'll still create the pending action
+    // Try minting strategies in order: Biconomy (gasless) -> Direct (backend pays gas) -> Queue for later
+    let mintResult: any = null;
+    
+    // Strategy 1: Try Biconomy for gasless transactions
+    if (isBiconomyAvailable()) {
+      try {
+        console.log('[Mint] Attempting Biconomy gasless transaction...');
+        mintResult = await sendGaslessTransaction({
+          to: userWallet,
+          course,
+          expires,
+          cid: metadataUri,
+          isRental: expiresInDays > 0
+        });
+        
+        console.log('[Mint] ✅ Biconomy gasless mint successful!');
+        
+        await createPendingAction({
+          userWallet,
+          course,
+          skills,
+          expiresAt: expires || null,
+          cid,
+          isRental: expiresInDays > 0,
+          issuerId: issuer!._id!,
+        });
+
+        return NextResponse.json({ 
+          success: true, 
+          cid,
+          type: certificateType,
+          metadataUri,
+          transactionHash: mintResult.hash,
+          blockNumber: mintResult.blockNumber,
+          method: 'biconomy',
+          message: 'Certificate minted successfully with Biconomy (gasless)!'
+        });
+      } catch (biconomyError: any) {
+        console.warn('[Mint] Biconomy failed, trying fallback:', biconomyError.message);
+      }
     }
+    
+    // Strategy 2: Direct on-chain minting (backend pays gas)
+    try {
+      console.log('[Mint] Attempting direct on-chain minting...');
+      // Use ethers v6 (works better in Next.js API routes)
+      const { JsonRpcProvider, Wallet, Contract } = await import('ethers');
+      const provider = new JsonRpcProvider(process.env.MUMBAI_RPC);
+      const backendWallet = new Wallet(process.env.BACKEND_PRIVATE_KEY!, provider);
+      
+      const contractABI = [
+        'function issueCredential(address to, string memory uri, uint64 expires, string memory skill) external returns (uint256)'
+      ];
+      
+      const contract = new Contract(
+        process.env.ISSUANCE_API_ADDRESS!,
+        contractABI,
+        backendWallet
+      );
 
-    await createPendingAction({
-      userWallet,
-      course,
-      skills,
-      expiresAt: expires || null,
-      cid,
-      isRental: expiresInDays > 0,
-      issuerId: issuer!._id!,
-    });
+      const tx = await contract.issueCredential(userWallet, metadataUri, expires, course);
+      console.log('[Mint] Transaction submitted:', tx.hash);
+      
+      const receipt = await tx.wait();
+      console.log('[Mint] ✅ NFT minted successfully! Block:', receipt.blockNumber);
+      
+      await createPendingAction({
+        userWallet,
+        course,
+        skills,
+        expiresAt: expires || null,
+        cid,
+        isRental: expiresInDays > 0,
+        issuerId: issuer!._id!,
+      });
 
-    return NextResponse.json({ 
-      success: true, 
-      cid,
-      type: certificateType,
-      metadataUri 
-    });
+      return NextResponse.json({ 
+        success: true, 
+        cid,
+        type: certificateType,
+        metadataUri,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        method: 'direct',
+        message: 'Certificate minted successfully on-chain!'
+      });
+    } catch (mintError: any) {
+      console.error('[Mint] All minting strategies failed:', mintError);
+      
+      // Strategy 3: Fallback - Store as pending action for manual settlement
+      await createPendingAction({
+        userWallet,
+        course,
+        skills,
+        expiresAt: expires || null,
+        cid,
+        isRental: expiresInDays > 0,
+        issuerId: issuer!._id!,
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        cid,
+        type: certificateType,
+        metadataUri,
+        pending: true,
+        method: 'queued',
+        message: 'Certificate created and queued for minting. Use /api/settle to complete.'
+      });
+    }
   } catch (error: any) {
     console.error('Issue certificate error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
