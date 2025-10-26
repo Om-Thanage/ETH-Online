@@ -11,6 +11,7 @@ interface Certificate {
   cid: string;
   isRental: boolean;
   tokenId?: number;
+  transactionHash?: string;
   createdAt: string;
   issuerName?: string;
 }
@@ -306,6 +307,25 @@ export default function UserCertificatesPage() {
                             </div>
                           )}
 
+                          {/* NFT Address */}
+                          <div>
+                            <p className="text-gray-500 text-xs">NFT Address</p>
+                            <a
+                              href={`https://amoy.polygonscan.com/token/${process.env.NEXT_PUBLIC_SKILL_NFT_ADDRESS || '0x0F46259A86b79011d40Af2038172fEfc4E673eC5'}${cert.tokenId !== undefined ? `?a=${cert.tokenId}` : ''}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:underline font-mono text-xs break-all"
+                            >
+                              {process.env.NEXT_PUBLIC_SKILL_NFT_ADDRESS || '0x0F46259A86b79011d40Af2038172fEfc4E673eC5'}
+                            </a>
+                          </div>
+
+                          {/* Network */}
+                          <div>
+                            <p className="text-gray-500 text-xs">Network</p>
+                            <p className="text-white font-bold">Polygon Amoy (80002)</p>
+                          </div>
+
                           <div>
                             <p className="text-gray-500 text-xs">Certificate Data</p>
                             <a
@@ -317,6 +337,20 @@ export default function UserCertificatesPage() {
                               View on IPFS →
                             </a>
                           </div>
+
+                          {cert.transactionHash && (
+                            <div>
+                              <p className="text-gray-500 text-xs">Transaction</p>
+                              <a
+                                href={`https://amoy.polygonscan.com/tx/${cert.transactionHash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline font-mono text-xs break-all"
+                              >
+                                {cert.transactionHash}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

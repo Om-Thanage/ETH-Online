@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
+import { mintWithIssuer } from '@/lib/web3';
 
 interface IssueCertificateFormProps {
   apiKey: string;
@@ -27,6 +28,7 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
   const [success, setSuccess] = useState('');
   const [txHash, setTxHash] = useState('');
   const [blockNumber, setBlockNumber] = useState<number | null>(null);
+  const [mintedTokenId, setMintedTokenId] = useState<number | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -37,7 +39,8 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
     setError('');
     setSuccess('');
     setTxHash('');
-    setBlockNumber(null);
+  setBlockNumber(null);
+  setMintedTokenId(null);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +81,8 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
     setError('');
     setSuccess('');
     setTxHash('');
-    setBlockNumber(null);
+  setBlockNumber(null);
+  setMintedTokenId(null);
 
     // Validation
     if (!formData.userWallet || !formData.course) {
@@ -119,7 +123,7 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
         certificateType,
       };
 
-      // If image type, we need to upload the image separately
+  // If image type, we need to upload the image separately
       if (certificateType === 'image' && imageFile) {
         // Create FormData for image upload
         const formDataWithImage = new FormData();
@@ -136,6 +140,7 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
           method: 'POST',
           headers: {
             Authorization: `Bearer ${apiKey}`,
+            'x-mint-mode': 'client',
           },
           body: formDataWithImage,
         });
@@ -143,13 +148,45 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
         const data = await res.json();
 
         if (res.ok && data.success) {
+          // Perform client-side mint using issuer wallet
+          const contractAddress = process.env.NEXT_PUBLIC_SKILL_NFT_ADDRESS || process.env.SKILL_NFT_ADDRESS || '';
+          if (!contractAddress) {
+            throw new Error('Missing contract address');
+          }
+
+          const mint = await mintWithIssuer({
+            to: formData.userWallet,
+            metadataUri: data.metadataUri,
+            expires: data.expires,
+            course: formData.course,
+            contractAddress,
+          });
+
+          setTxHash(mint.hash);
+          setBlockNumber(mint.blockNumber);
+          if (mint.tokenId !== undefined) setMintedTokenId(mint.tokenId);
           setSuccess(`Certificate issued successfully! CID: ${data.cid}`);
-          if (data.transactionHash) {
-            setTxHash(data.transactionHash);
-          }
-          if (data.blockNumber) {
-            setBlockNumber(data.blockNumber);
-          }
+
+          // Record credential server-side
+          await fetch('/api/issue/record', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              userWallet: formData.userWallet,
+              course: formData.course,
+              skills: skillsArray,
+              expires: data.expires,
+              cid: data.cid,
+              isRental: formData.expiresInDays > 0,
+              transactionHash: mint.hash,
+              blockNumber: mint.blockNumber,
+              tokenId: mint.tokenId,
+            }),
+          });
+
           resetForm();
           if (onSuccess) onSuccess();
         } else {
@@ -162,6 +199,7 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${apiKey}`,
+            'x-mint-mode': 'client',
           },
           body: JSON.stringify(requestBody),
         });
@@ -169,13 +207,45 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
         const data = await res.json();
 
         if (res.ok && data.success) {
+          // Client-side mint
+          const contractAddress = process.env.NEXT_PUBLIC_SKILL_NFT_ADDRESS || process.env.SKILL_NFT_ADDRESS || '';
+          if (!contractAddress) {
+            throw new Error('Missing contract address');
+          }
+
+          const mint = await mintWithIssuer({
+            to: formData.userWallet,
+            metadataUri: data.metadataUri,
+            expires: data.expires,
+            course: formData.course,
+            contractAddress,
+          });
+
+          setTxHash(mint.hash);
+          setBlockNumber(mint.blockNumber);
+          if (mint.tokenId !== undefined) setMintedTokenId(mint.tokenId);
           setSuccess(`Certificate issued successfully! CID: ${data.cid}`);
-          if (data.transactionHash) {
-            setTxHash(data.transactionHash);
-          }
-          if (data.blockNumber) {
-            setBlockNumber(data.blockNumber);
-          }
+
+          // Record credential server-side
+          await fetch('/api/issue/record', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              userWallet: formData.userWallet,
+              course: formData.course,
+              skills: skillsArray,
+              expires: data.expires,
+              cid: data.cid,
+              isRental: formData.expiresInDays > 0,
+              transactionHash: mint.hash,
+              blockNumber: mint.blockNumber,
+              tokenId: mint.tokenId,
+            }),
+          });
+
           resetForm();
           if (onSuccess) onSuccess();
         } else {
@@ -405,6 +475,12 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
                     >
                       {blockNumber}
                     </a>
+                  </div>
+                )}
+                {mintedTokenId !== null && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400 font-semibold">Token ID:</span>
+                    <span className="text-white font-mono">#{mintedTokenId}</span>
                   </div>
                 )}
                 <div className="text-xs text-gray-400 mt-2">

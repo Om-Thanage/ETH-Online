@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     // Check if issuer already exists
     const existingIssuer = await getIssuerByWallet(wallet);
-    if (existingIssuer) {
+    if (existingIssuer && existingIssuer.status !== 'rejected') {
       return NextResponse.json(
         { error: 'Issuer with this wallet already exists' },
         { status: 409 }

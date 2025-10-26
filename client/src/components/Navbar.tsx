@@ -8,7 +8,7 @@ export default function Navbar() {
       <div className="flex items-center gap-8">
         <Link href="/">
           <span className="text-xl font-extrabold tracking-wide text-white cursor-pointer hover:text-gray-300">
-            NeoCorp
+            Credence
           </span>
         </Link>
         <div className="flex items-center gap-6 text-sm">

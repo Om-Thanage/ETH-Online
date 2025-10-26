@@ -12,6 +12,9 @@ export async function POST(req: Request) {
   if (authError) return authError;
 
   try {
+    // If client-managed minting is requested, only prepare metadata and return it.
+    const mintMode = req.headers.get('x-mint-mode'); // 'client' => client will do on-chain tx
+
     const contentType = req.headers.get('content-type') || '';
     let body: any;
     let certificateType = 'text';
@@ -129,6 +132,18 @@ export async function POST(req: Request) {
 
     // Get issuer before minting
     const issuer = await findIssuerByApiKey(req.headers.get('authorization')!.split(' ')[1]!);
+    
+    // If client-side minting is requested, return metadata without performing on-chain tx
+    if (mintMode === 'client') {
+      return NextResponse.json({
+        success: true,
+        cid,
+        type: certificateType,
+        metadataUri,
+        expires,
+        message: 'Metadata prepared. Proceed with client-side mint.'
+      });
+    }
     
     // Try minting strategies in order: Biconomy (gasless) -> Direct (backend pays gas) -> Queue for later
     let mintResult: any = null;
