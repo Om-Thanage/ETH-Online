@@ -26,43 +26,48 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
-  const fetchIssuers = async () => {
+  const fetchIssuers = async (isSuperAdmin: boolean): Promise<void> => {
     try {
-      const res = await fetch('/api/admin/issuers', 
-        { credentials: 'include' });
-      if (res.status === 200) {
-        const data = await res.json();
-        setIssuers(data.issuers || []);
-      } else {
-        alert('Failed to fetch issuers');
-      }
-    } catch (error) {
-      alert(`Error fetching issuers: ${error}`);
-    }
-  }
+      const endpoint = isSuperAdmin
+        ? "/api/admin/admins/getIssuers"
+        : "/api/admin/issuers";
 
-  const fetchData = async () => {
-    try {
-      // Fetch admins if super admin
-      try {
-        const adminsRes = await fetch('/api/admin/admins', {
-          credentials: 'include',
-        });
-        if (adminsRes.status === 200) {
-          const adminsData = await adminsRes.json();
-          setAdmins(adminsData.admins || []);
-          setIsSuperAdmin(true);
-          fetchIssuers();
-        } else if (adminsRes.status === 403) {
-          console.log('User is not super admin');
-          setIsSuperAdmin(false);
-        }
-      } catch (e) {
-        console.error('Error fetching admins:', e);
-        setIsSuperAdmin(false);
-      }
+      const res = await fetch(endpoint, { credentials: "include" });
+
+      if (!res.ok) throw new Error("Failed to fetch issuers");
+
+      const data = await res.json();
+      setIssuers(data.issuers || []);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      if (error instanceof Error) {
+        alert(`Error fetching issuers: ${error.message}`);
+      } else {
+        alert("Unknown error fetching issuers");
+      }
+    }
+  };
+
+  const fetchData = async (): Promise<void> => {
+    setLoading(true);
+    try {
+      const adminsRes = await fetch("/api/admin/admins", { credentials: "include" });
+
+      if (adminsRes.status === 200) {
+        const adminsData = await adminsRes.json();
+        setAdmins(adminsData.admins || []);
+        setIsSuperAdmin(true);
+        await fetchIssuers(true);
+      } else if (adminsRes.status === 403) {
+        // console.log("User is not super admin");
+        setIsSuperAdmin(false);
+        await fetchIssuers(false);
+      } else {
+        throw new Error(`Unexpected status: ${adminsRes.status}`);
+      }
+    } catch (e) {
+      console.error("Error fetching admins:", e);
+      setIsSuperAdmin(false);
+      await fetchIssuers(false);
     } finally {
       setLoading(false);
     }

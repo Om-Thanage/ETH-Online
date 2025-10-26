@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { verifyAdmin } from '@/middleware/adminAuth';
+import { verifySuperAdmin } from '@/middleware/adminAuth';
 import { getAllIssuers } from '@/models/Issuer';
 
 export async function GET(req: NextRequest) {
-  const { admin, error: authError } = await verifyAdmin(req);
+  const { admin, error: authError } = await verifySuperAdmin(req);
   if (authError) {
     return NextResponse.json(
       { error: authError },
