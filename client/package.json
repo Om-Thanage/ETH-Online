@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:yellow": "tsx --env-file=.env src/lib/yellow-test.ts",
+    "test:mint": "tsx --env-file=.env src/lib/test-offchain-mint.ts",
+    "discover:yellow": "tsx --env-file=.env src/lib/discover-yellow-methods.ts"
   },
   "dependencies": {
     "@erc7824/nitrolite": "^0.4.0",
@@ -14,7 +17,6 @@
     "@web3auth/modal": "^10.5.4",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
-    "ethers": "^6.15.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.548.0",
     "mongodb": "^6.20.0",
@@ -22,10 +24,12 @@
     "next": "16.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "tsx": "^4.20.6",
     "wagmi": "^2.18.2",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@biconomy/mexa": "^3.0.6",
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
@@ -33,6 +37,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
+    "ethers": "^6.15.0",
+    "ethers-v5": "npm:ethers@^5.7.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
