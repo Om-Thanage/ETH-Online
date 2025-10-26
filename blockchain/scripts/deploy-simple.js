@@ -17,21 +17,21 @@ async function main() {
   const skillNFTAddress = await skillNFT.getAddress();
   console.log("✅ SkillNFT deployed to:", skillNFTAddress);
 
-//   // 2. Deploy IssuanceAPI
-//   console.log("\nDeploying IssuanceAPI...");
-//   const IssuanceAPI = await connection.ethers.getContractFactory("IssuanceAPI");
-//   const issuanceAPI = await IssuanceAPI.deploy(skillNFTAddress, backendWallet);
-//   await issuanceAPI.waitForDeployment();
-//   const issuanceAPIAddress = await issuanceAPI.getAddress();
-//   console.log("✅ IssuanceAPI deployed to:", issuanceAPIAddress);
+  // 2. Deploy IssuanceAPI
+  console.log("\nDeploying IssuanceAPI...");
+  const IssuanceAPI = await connection.ethers.getContractFactory("IssuanceAPI");
+  const issuanceAPI = await IssuanceAPI.deploy(skillNFTAddress, backendWallet);
+  await issuanceAPI.waitForDeployment();
+  const issuanceAPIAddress = await issuanceAPI.getAddress();
+  console.log("✅ IssuanceAPI deployed to:", issuanceAPIAddress);
 
-//   // 3. Deploy CredentialVerifier
-//   console.log("\nDeploying CredentialVerifier...");
-//   const CredentialVerifier = await connection.ethers.getContractFactory("CredentialVerifier");
-//   const verifier = await CredentialVerifier.deploy(skillNFTAddress);
-//   await verifier.waitForDeployment();
-//   const verifierAddress = await verifier.getAddress();
-//   console.log("✅ CredentialVerifier deployed to:", verifierAddress);
+  // 3. Deploy CredentialVerifier
+  console.log("\nDeploying CredentialVerifier...");
+  const CredentialVerifier = await connection.ethers.getContractFactory("CredentialVerifier");
+  const verifier = await CredentialVerifier.deploy(skillNFTAddress);
+  await verifier.waitForDeployment();
+  const verifierAddress = await verifier.getAddress();
+  console.log("✅ CredentialVerifier deployed to:", verifierAddress);
 
   console.log("\n===========================================");
   console.log("📋 DEPLOYMENT SUMMARY");
