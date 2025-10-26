@@ -25,6 +25,8 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [txHash, setTxHash] = useState('');
+  const [blockNumber, setBlockNumber] = useState<number | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,6 +36,8 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
     }));
     setError('');
     setSuccess('');
+    setTxHash('');
+    setBlockNumber(null);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +77,8 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
     e.preventDefault();
     setError('');
     setSuccess('');
+    setTxHash('');
+    setBlockNumber(null);
 
     // Validation
     if (!formData.userWallet || !formData.course) {
@@ -138,6 +144,12 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
 
         if (res.ok && data.success) {
           setSuccess(`Certificate issued successfully! CID: ${data.cid}`);
+          if (data.transactionHash) {
+            setTxHash(data.transactionHash);
+          }
+          if (data.blockNumber) {
+            setBlockNumber(data.blockNumber);
+          }
           resetForm();
           if (onSuccess) onSuccess();
         } else {
@@ -158,6 +170,12 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
 
         if (res.ok && data.success) {
           setSuccess(`Certificate issued successfully! CID: ${data.cid}`);
+          if (data.transactionHash) {
+            setTxHash(data.transactionHash);
+          }
+          if (data.blockNumber) {
+            setBlockNumber(data.blockNumber);
+          }
           resetForm();
           if (onSuccess) onSuccess();
         } else {
@@ -359,8 +377,41 @@ export default function IssueCertificateForm({ apiKey, onSuccess }: IssueCertifi
         )}
 
         {success && (
-          <div className="p-4 bg-green-900 bg-opacity-50 border border-green-700 rounded text-green-300">
-            ✓ {success}
+          <div className="p-4 bg-green-900 bg-opacity-50 border border-green-700 rounded">
+            <div className="text-green-300 mb-2">
+              ✓ {success}
+            </div>
+            {txHash && (
+              <div className="mt-3 space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 font-semibold whitespace-nowrap">Transaction:</span>
+                  <a
+                    href={`https://amoy.polygonscan.com/tx/${txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline break-all"
+                  >
+                    {txHash}
+                  </a>
+                </div>
+                {blockNumber && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400 font-semibold">Block:</span>
+                    <a
+                      href={`https://amoy.polygonscan.com/block/${blockNumber}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      {blockNumber}
+                    </a>
+                  </div>
+                )}
+                <div className="text-xs text-gray-400 mt-2">
+                  🔗 View on Polygonscan to see your NFT details
+                </div>
+              </div>
+            )}
           </div>
         )}
 

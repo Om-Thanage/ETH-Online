@@ -12,6 +12,9 @@ export interface PendingAction {
   issuerId: ObjectId;
   settled: boolean;
   createdAt: Date;
+  transactionHash?: string;
+  blockNumber?: number;
+  tokenId?: number;
 }
 
 export async function createPendingAction(data: Omit<PendingAction, 'createdAt' | 'settled'>) {

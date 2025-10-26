@@ -15,8 +15,8 @@ export async function POST(req: Request) {
     const provider = new ethers.JsonRpcProvider(process.env.MUMBAI_RPC);
     const wallet = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY!, provider);
     const contract = new ethers.Contract(
-      process.env.ISSUANCE_API_ADDRESS!,
-      ['function issueCredential(address,string,uint64,string) returns (uint256)'],
+      process.env.SKILL_NFT_ADDRESS!,  // Changed from ISSUANCE_API_ADDRESS
+      ['function mintToUser(address,string,uint64,string) returns (uint256)'],  // Changed function name
       wallet
     );
 
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     
     // Issue credentials one by one
     for (const action of pending) {
-      const tx = await contract.issueCredential(
+      const tx = await contract.mintToUser(  // Changed from issueCredential
         action.userWallet,
         action.cid, // URI
         action.expiresAt || 0, // expires

@@ -12,6 +12,8 @@ interface Certificate {
   tokenId?: number;
   createdAt: string;
   status?: 'active' | 'expired' | 'revoked';
+  transactionHash?: string;
+  blockNumber?: number;
 }
 
 interface ManageCertificatesProps {
@@ -262,9 +264,19 @@ export default function ManageCertificates({ apiKey }: ManageCertificatesProps) 
                       )}
 
                       {cert.tokenId !== undefined && (
-                        <p className="text-gray-300">
-                          <span className="text-gray-400">Token ID:</span> #{cert.tokenId}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-gray-300">
+                            <span className="text-gray-400">Token ID:</span> #{cert.tokenId}
+                          </p>
+                          <a
+                            href={`https://amoy.polygonscan.com/token/${process.env.NEXT_PUBLIC_SKILL_NFT_ADDRESS || '0x0F46259A86b79011d40Af2038172fEfc4E673eC5'}?a=${cert.tokenId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            🔗 View on Polygonscan
+                          </a>
+                        </div>
                       )}
 
                       <p className="text-gray-300">
@@ -278,6 +290,20 @@ export default function ManageCertificates({ apiKey }: ManageCertificatesProps) 
                           {cert.cid.slice(0, 20)}...
                         </a>
                       </p>
+
+                      {cert.transactionHash && (
+                        <p className="text-gray-300">
+                          <span className="text-gray-400">Transaction:</span>{' '}
+                          <a
+                            href={`https://amoy.polygonscan.com/tx/${cert.transactionHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline font-mono text-xs"
+                          >
+                            {cert.transactionHash.slice(0, 10)}...{cert.transactionHash.slice(-8)}
+                          </a>
+                        </p>
+                      )}
                     </div>
                   </div>
 

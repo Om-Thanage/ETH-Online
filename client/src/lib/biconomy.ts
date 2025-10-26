@@ -19,7 +19,7 @@ export async function initBiconomy() {
     const biconomy = new Biconomy(provider, {
       apiKey: process.env.BICONOMY_API_KEY || '',
       debug: process.env.NODE_ENV === 'development',
-      contractAddresses: [process.env.ISSUANCE_API_ADDRESS!],
+      contractAddresses: [process.env.SKILL_NFT_ADDRESS!],  // Changed from ISSUANCE_API_ADDRESS
     });
 
     biconomyInstance = biconomy;
@@ -85,12 +85,13 @@ export async function sendGaslessTransaction(data: {
     const biconomyProvider = biconomy.getEthersProvider();
     const wallet = new ethers.Wallet(process.env.BACKEND_PRIVATE_KEY!, biconomyProvider);
 
+    // Call SkillNFT.mintToUser directly
     const contractABI = [
-      'function issueCredential(address to, string memory uri, uint64 expires, string memory skill) external returns (uint256)'
+      'function mintToUser(address to, string memory uri, uint64 expires, string memory skill) external returns (uint256)'
     ];
 
     const contract = new ethers.Contract(
-      process.env.ISSUANCE_API_ADDRESS!,
+      process.env.SKILL_NFT_ADDRESS!,  // Changed from ISSUANCE_API_ADDRESS
       contractABI,
       wallet
     );
@@ -102,7 +103,7 @@ export async function sendGaslessTransaction(data: {
     });
 
     // Send transaction through Biconomy
-    const tx = await contract.issueCredential(data.to, data.cid, data.expires, data.course);
+    const tx = await contract.mintToUser(data.to, data.cid, data.expires, data.course);
     console.log('[Biconomy] Transaction submitted:', tx.hash);
 
     const receipt = await tx.wait();

@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         const metadata = {
           name: course,
           description: `Certificate for ${course}`,
-          image: `ipfs://${imageCid}`,
+          image: `https://gateway.lighthouse.storage/ipfs/${imageCid}`,
           attributes: [
             { trait_type: 'Course', value: course },
             { trait_type: 'Skills', value: skills.join(', ') },
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
           process.env.LIGHTHOUSE_API_KEY!
         );
         cid = metadataUpload.data.Hash;
-        metadataUri = `ipfs://${cid}`;
+        metadataUri = `https://gateway.lighthouse.storage/ipfs/${cid}`;
       } catch (uploadError) {
         // Clean up temp file on error
         if (fs.existsSync(tempFilePath)) {
@@ -105,6 +105,7 @@ export async function POST(req: Request) {
       const certData = {
         name: course,
         description: `Certificate for ${course}`,
+        image: `https://via.placeholder.com/400x300/6366f1/ffffff?text=${encodeURIComponent(course)}`, // Placeholder image for text certificates
         course,
         skills,
         issuedAt: new Date().toISOString(),
@@ -121,7 +122,7 @@ export async function POST(req: Request) {
         process.env.LIGHTHOUSE_API_KEY!
       );
       cid = response.data.Hash;
-      metadataUri = `ipfs://${cid}`;
+      metadataUri = `https://gateway.lighthouse.storage/ipfs/${cid}`;
     }
 
     const expires = expiresInDays > 0 ? Math.floor(Date.now() / 1000) + expiresInDays * 86400 : 0;
@@ -154,6 +155,8 @@ export async function POST(req: Request) {
           cid,
           isRental: expiresInDays > 0,
           issuerId: issuer!._id!,
+          transactionHash: mintResult.hash,
+          blockNumber: mintResult.blockNumber,
         });
 
         return NextResponse.json({ 
@@ -179,17 +182,18 @@ export async function POST(req: Request) {
       const provider = new JsonRpcProvider(process.env.MUMBAI_RPC);
       const backendWallet = new Wallet(process.env.BACKEND_PRIVATE_KEY!, provider);
       
+      // Call SkillNFT.mintToUser directly instead of going through IssuanceAPI
       const contractABI = [
-        'function issueCredential(address to, string memory uri, uint64 expires, string memory skill) external returns (uint256)'
+        'function mintToUser(address to, string memory uri, uint64 expires, string memory skill) external returns (uint256)'
       ];
       
       const contract = new Contract(
-        process.env.ISSUANCE_API_ADDRESS!,
+        process.env.SKILL_NFT_ADDRESS!,  // Changed from ISSUANCE_API_ADDRESS to SKILL_NFT_ADDRESS
         contractABI,
         backendWallet
       );
 
-      const tx = await contract.issueCredential(userWallet, metadataUri, expires, course);
+      const tx = await contract.mintToUser(userWallet, metadataUri, expires, course);
       console.log('[Mint] Transaction submitted:', tx.hash);
       
       const receipt = await tx.wait();
@@ -203,6 +207,8 @@ export async function POST(req: Request) {
         cid,
         isRental: expiresInDays > 0,
         issuerId: issuer!._id!,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
       });
 
       return NextResponse.json({ 
