@@ -38,11 +38,19 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
         _setTokenURI(tokenId, uri);
 
         if (expires > 0) {
-            setUser(tokenId, to, expires);
+            _setUser(tokenId, to, expires);
         }
 
         emit CredentialMinted(tokenId, to, expires, skill, msg.sender);
         return tokenId;
+    }
+    
+    // Internal function to set user without permission check (used during minting)
+    function _setUser(uint256 tokenId, address user, uint64 expires) internal {
+        UserInfo storage info = _users[tokenId];
+        info.user = user;
+        info.expires = expires;
+        emit UpdateUser(tokenId, user, expires);
     }
 
     function _beforeTokenTransfer(
@@ -58,7 +66,19 @@ contract SkillNFT is ERC721, ERC721URIStorage, ERC4907, ISkillNFT {
 
     function setUser(uint256 tokenId, address user, uint64 expires) 
         public override(ERC4907, ISkillNFT) {
-        ERC4907.setUser(tokenId, user, expires);
+        // Allow owner, approved addresses, or the token owner to set user
+        address owner = ownerOf(tokenId);
+        require(
+            msg.sender == owner || 
+            isApprovedForAll(owner, msg.sender) || 
+            getApproved(tokenId) == msg.sender,
+            "Not owner/approved"
+        );
+        
+        UserInfo storage info = _users[tokenId];
+        info.user = user;
+        info.expires = expires;
+        emit UpdateUser(tokenId, user, expires);
     }
 
     function userOf(uint256 tokenId) 
