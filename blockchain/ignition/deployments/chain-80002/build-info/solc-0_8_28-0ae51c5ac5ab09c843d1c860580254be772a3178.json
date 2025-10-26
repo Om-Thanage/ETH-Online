@@ -1,0 +1,42 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-0ae51c5ac5ab09c843d1c860580254be772a3178",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/IssuanceAPI.sol": "project/contracts/IssuanceAPI.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/interfaces/ISkillNFT.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\ninterface ISkillNFT {\r\n    function mintToUser(\r\n        address to,\r\n        string memory uri,\r\n        uint64 expires,\r\n        string memory skill\r\n    ) external returns (uint256);\r\n\r\n    function setUser(uint256 tokenId, address user, uint64 expires) external;\r\n    function userOf(uint256 tokenId) external view returns (address);\r\n    function userExpires(uint256 tokenId) external view returns (uint64);\r\n}"
+      },
+      "project/contracts/IssuanceAPI.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\nimport \"./interfaces/ISkillNFT.sol\";\r\n\r\ncontract IssuanceAPI {\r\n    ISkillNFT public immutable skillNFT;\r\n    address public immutable backend;\r\n\r\n    event CredentialIssued(uint256 indexed tokenId, address indexed user);\r\n\r\n    constructor(address _skillNFT, address _backend) {\r\n        skillNFT = ISkillNFT(_skillNFT);\r\n        backend = _backend;\r\n    }\r\n\r\n    modifier onlyBackend() {\r\n        require(msg.sender == backend, \"Not backend\");\r\n        _;\r\n    }\r\n\r\n    function issueCredential(\r\n        address user,\r\n        string memory uri,\r\n        uint64 expires,\r\n        string memory skill\r\n    ) external onlyBackend returns (uint256) {\r\n        uint256 tokenId = skillNFT.mintToUser(user, uri, expires, skill);\r\n        emit CredentialIssued(tokenId, user);\r\n        return tokenId;\r\n    }\r\n}"
+      }
+    }
+  }
+}
